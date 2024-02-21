@@ -22,6 +22,8 @@ import com.montanha.gerenciador.entities.Viagem;
 import com.montanha.gerenciador.repositories.ViagemRepository;
 import com.montanha.gerenciador.services.exceptions.ViagemServiceException;
 
+import java.util.Optional;
+
 import static java.lang.String.format;
 
 @Service
@@ -53,36 +55,32 @@ public class ViagemServices {
 	}
 
 	public ViagemDtoResponse buscar(Long id) throws IOException, NotFoundException {
-		Viagem viagem = viagemRepository.findOne(id);
+	    Optional<Viagem> viagemOptional = viagemRepository.findById(id);
 
-		if (viagem == null) {
-			throw new NotFoundException(format("Viagem com id: [%s] não encontrada", id));
+	    if (!viagemOptional.isPresent()) {
+	        throw new NotFoundException(format("Viagem com id: [%s] não encontrada", id));
+	    }
 
-		}
+	    Viagem viagem = viagemOptional.get();
+	    ViagemDtoResponse viagemDtoResponse = Conversor.converterViagemToViagemDtoResponse(viagem);
+	    String regiao = viagem.getRegiao();
 
-		ViagemDtoResponse viagemDtoResponse = Conversor.converterViagemToViagemDtoResponse(viagem);
-		String regiao = viagem.getRegiao();
+	    if (regiao != null) {
+	        final String uri = previsaoDoTempoUri + "tempo-api/temperatura?regiao=" + regiao;
+	        RestTemplate restTemplate = new RestTemplate();
+	        String previsaoJson = "";
 
-		if (regiao != null) {
-			final String uri = previsaoDoTempoUri + "tempo-api/temperatura?regiao=" + regiao;
-			RestTemplate restTemplate = new RestTemplate();
+	        try {
+	            previsaoJson = restTemplate.getForObject(uri, String.class);
+	        } catch (HttpClientErrorException hcee) {
+	            throw new HttpClientErrorException(HttpStatus.UNPROCESSABLE_ENTITY, "A API do Tempo não está online");
+	        }
 
-			String previsaoJson = "";
+	        ObjectNode node = mapper.readValue(previsaoJson, ObjectNode.class);
+	        viagemDtoResponse.setTemperatura((node.get("data").get("temperatura")).floatValue());
+	    }
 
-			try {
-				previsaoJson = restTemplate.getForObject(uri, String.class);
-			} catch (HttpClientErrorException hcee) {
-				throw new HttpClientErrorException(HttpStatus.UNPROCESSABLE_ENTITY, "A API do Tempo não está online");
-			}
-
-			ObjectNode node = mapper.readValue(previsaoJson, ObjectNode.class);
-			viagemDtoResponse.setTemperatura((node.get("data").get("temperatura")).floatValue());
-
-			System.out.println(previsaoDoTempoUri);
-
-		}
-
-		return viagemDtoResponse;
+	    return viagemDtoResponse;
 	}
 
 	public Viagem buscarPorLocalDeDestino(String localDeDestino) {
@@ -114,22 +112,31 @@ public class ViagemServices {
 	}
 
 	public Viagem buscarSemTratativa(Long id) {
-		Viagem viagem = viagemRepository.findOne(id);
-
-		return viagem;
+	    Optional<Viagem> viagemOptional = viagemRepository.findById(id);
+	    
+	    if (viagemOptional.isPresent()) {
+	        return viagemOptional.get();
+	    } else {
+	        // Aqui você pode decidir o que fazer se a viagem não for encontrada.
+	        // Por exemplo, você pode retornar null ou lançar uma exceção.
+	        return null;
+	    }
 	}
 
-	public Viagem alterar(ViagemDto viagemDto, Long id) {
-
-		Viagem viagemExistente = viagemRepository.findOne(id);
-
-		// iremos ter um nullPointerException aqui.
-		viagemExistente.setLocalDeDestino(viagemDto.getLocalDeDestino());
-		viagemExistente.setDataPartida(viagemDto.getDataPartida());
-		viagemExistente.setDataRetorno(viagemDto.getDataRetorno());
-		viagemExistente.setAcompanhante(viagemDto.getAcompanhante());
-		viagemExistente.setRegiao(viagemDto.getRegiao());
-		return viagemRepository.save(viagemExistente);
+	public Viagem alterar(ViagemDto viagemDto, Long id) throws NotFoundException {
+	    Optional<Viagem> viagemExistenteOptional = viagemRepository.findById(id);
+	    
+	    if (!viagemExistenteOptional.isPresent()) {
+	        throw new NotFoundException("Viagem não encontrada para o ID: " + id);
+	    }
+	    
+	    Viagem viagemExistente = viagemExistenteOptional.get();
+	    viagemExistente.setLocalDeDestino(viagemDto.getLocalDeDestino());
+	    viagemExistente.setDataPartida(viagemDto.getDataPartida());
+	    viagemExistente.setDataRetorno(viagemDto.getDataRetorno());
+	    viagemExistente.setAcompanhante(viagemDto.getAcompanhante());
+	    viagemExistente.setRegiao(viagemDto.getRegiao());
+	    
+	    return viagemRepository.save(viagemExistente);
 	}
-
 }
