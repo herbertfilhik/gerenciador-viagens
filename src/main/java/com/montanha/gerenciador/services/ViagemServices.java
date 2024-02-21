@@ -3,6 +3,9 @@ package com.montanha.gerenciador.services;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.montanha.gerenciador.dtos.ViagemDto;
 import com.montanha.gerenciador.dtos.ViagemDtoResponse;
 import com.montanha.gerenciador.utils.Conversor;
 import javassist.NotFoundException;
@@ -17,7 +20,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.montanha.gerenciador.dtos.ViagemDto;
 import com.montanha.gerenciador.entities.Viagem;
 import com.montanha.gerenciador.repositories.ViagemRepository;
 import com.montanha.gerenciador.services.exceptions.ViagemServiceException;

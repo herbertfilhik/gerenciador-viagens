@@ -12,8 +12,6 @@ public class ViagemDto implements Serializable {
 
 	private static final long serialVersionUID = -8105241933692707649L;
 
-
-
 	@ApiModelProperty(value = "Local de destino da viagem")
 	private String localDeDestino;
 
