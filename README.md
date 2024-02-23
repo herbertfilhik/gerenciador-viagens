@@ -13,6 +13,7 @@ execução do projeto
 mvn clean install
 mvn test
 mvn spring-boot:run
+mvn clean verify
 ```
 
 java e compiler
