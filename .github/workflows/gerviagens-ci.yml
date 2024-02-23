@@ -22,12 +22,11 @@ jobs:
     - name: Test with Maven Verify
       run: mvn clean verify
       
-    - name: List Maven repository content
-      run: Get-ChildItem -Path ~/gerenciador-viagens/target/site/jacoco
+    - name: List JaCoCo Report Directory
+      run: Get-ChildItem -Path .\target\site\jacoco\ -Recurse
 
-    # Passo para upload do relatório de testes como artefato
-    - name: Upload Test Report
+    - name: Upload Coverage Report
       uses: actions/upload-artifact@v2
       with:
-        name: test-reports
-        path: /target/site/jacoco/*.*
+        name: jacoco-reports
+        path: target/site/jacoco/**
