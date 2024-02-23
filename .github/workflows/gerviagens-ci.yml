@@ -19,11 +19,11 @@ jobs:
       with:
         java-version: 1.8
 
-    - name: Build with Maven
-      run: mvn clean install -DskipTests
-
-    - name: Test with Maven
-      run: mvn test
+    - name: Test with Maven Verify
+      run: mvn clean verify
+      
+    - name: List contents of .m2/repository
+      run: ls -la ~/.m2/repository
 
     # Passo para upload do relatório de testes como artefato
     - name: Upload Test Report
