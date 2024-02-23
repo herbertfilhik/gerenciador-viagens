@@ -23,7 +23,7 @@ jobs:
       run: mvn clean verify
       
     - name: List Maven repository content
-      run: Get-ChildItem -Path ~/.m2/repository -Recurse
+      run: Get-ChildItem -Path ~/gerenciador-viagens/target/site/jacoco
 
     # Passo para upload do relatório de testes como artefato
     - name: Upload Test Report
