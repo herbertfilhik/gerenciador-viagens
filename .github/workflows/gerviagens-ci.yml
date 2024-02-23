@@ -22,8 +22,8 @@ jobs:
     - name: Test with Maven Verify
       run: mvn clean verify
       
-    - name: List contents of .m2/repository
-      run: ls -la ~/.m2/repository
+    - name: List Maven repository content
+      run: Get-ChildItem -Path ~/.m2/repository -Recurse
 
     # Passo para upload do relatório de testes como artefato
     - name: Upload Test Report
